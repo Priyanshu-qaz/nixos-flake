@@ -1,5 +1,5 @@
 {
-  description = "Home Manager configuration using flakes";
+  description = "NixOS + Home Manager configuration using flakes";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
@@ -9,20 +9,27 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
-    let
+  outputs = { self, nixpkgs, home-manager, ... }: {
+    nixosConfigurations."priyanshu@nixos" = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
+      modules = [
+        ./configuration.nix
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.priyanshu = import ./home.nix;
+        }
+      ];
+    };
+
+    homeConfigurations.priyanshu = home-manager.lib.homeManagerConfiguration {
       pkgs = import nixpkgs {
-        inherit system;
+        system = "x86_64-linux";
         config.allowUnfree = true;
       };
-    in {
-      homeConfigurations.priyanshu = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-        ];
-      };
+      modules = [ ./home.nix ];
     };
+  };
 }
 
