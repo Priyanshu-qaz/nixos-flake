@@ -8,5 +8,7 @@
   home.packages = with pkgs; [
     htop
     neofetch
+    kind
+    kubectl
   ];
 }
